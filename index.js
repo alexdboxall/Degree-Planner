@@ -22,37 +22,64 @@ let allCourseData = [
         name: "Programming as Problem Solving",
         sem1: true,
         sem2: true,
-        prereq: {
-
-        }
+        prereq: []
     },
     {
         code: "COMP1130",
         name: "Programming as Problem Solving (Advanced)",
         sem1: true,
         sem2: false,
-        prereq: {
-
-        }
+        prereq: {}
     },
     {
         code: "COMP1110",
         name: "Structured Programming",
         sem1: false,
         sem2: true,
-        prereq: [
-            "COMP1100/COMP1130"
-        ]
+        prereq: ["COMP1100/COMP1130"]
     },
     {
         code: "COMP1140",
         name: "Structured Programming (Advanced)",
         sem1: false,
         sem2: true,
-        prereq: [
-            "COMP1130"
-        ]
-    }
+        prereq: ["COMP1130"]
+    },
+    {
+        code: "COMP1600",
+        name: "Foundations of Computing",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP1100/COMP1130", "MATH"]
+    },
+    {
+        code: "MATH1013",
+        name: "Mathematics and Applications 1",
+        sem1: true,
+        sem2: true,
+        prereq: []
+    },
+    {
+        code: "MATH1115",
+        name: "Advanced Mathematics and Applications 1",
+        sem1: true,
+        sem2: false,
+        prereq: []
+    },
+    {
+        code: "MATH1014",
+        name: "Mathematics and Applications 2",
+        sem1: false,
+        sem2: true,
+        prereq: ["MATH1013/MATH1115"]
+    },
+    {
+        code: "MATH1116",
+        name: "Advanced Mathematics and Applications 2",
+        sem1: false,
+        sem2: true,
+        prereq: ["MATH1115"]
+    },
 ];
 
 function getCoursesRunningBefore(gridY) {
@@ -68,8 +95,14 @@ function getCoursesRunningBefore(gridY) {
 }
 
 function containsCourse(courseArray, targetCode) {
+    /*
+    * Only checks to the length of the targetCode string
+    *
+    * This means things like COMP3 will match all COMP3xxx courses,
+    * and MATH will match all MATHxxxx courses.
+    */
     for (let i = 0; i < courseArray.length; ++i) {
-        if (courseArray[i].code == targetCode) {
+        if (courseArray[i].code.substr(0, targetCode.length) == targetCode) {
             return true;
         }
     }
@@ -188,16 +221,15 @@ function renderCourseAtPosition(code, x, y) {
         let prereq = checkPrerequisites(xToGridX(x), yToGridY(y));
 
         if (prereq == null) {
-            // error
-            courseColour = "#404040";
-
-        } else if (prereq.length) {
-            // missing prerequisite
-            courseColour = "#FF4040";
+            alert("ERROR");
 
         } else if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
             courseColour = "#FF8F40";
+
+        } else if (prereq.length) {
+            // missing prerequisite
+            courseColour = "#FF4040";
 
         } else {
             courseColour = "#20C0FF";
@@ -391,6 +423,10 @@ function addBasicCourses() {
         "COMP1110",
         "COMP1140",
         "COMP1600",
+        "MATH1013",
+        "MATH1014",
+        "MATH1115",
+        "MATH1116",
     ]
 
     for (let i = 0; i < course_list.length; ++i) {
