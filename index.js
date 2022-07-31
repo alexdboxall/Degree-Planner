@@ -140,6 +140,22 @@ let allCourseData = [
         prereq: ["COMP1110/COMP1140", "COMP2", "COMP1600/MATH2"],
         incompat: []
     },
+    {
+        code: "MATH1005",
+        name: "Discrete Mathematical Models",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        incompat: []
+    },
+    {
+        code: "MATH2222",
+        name: "Introduction to Mathematical Thinking: Problem-Solving and Proofs",
+        sem1: true,
+        sem2: false,
+        prereq: ["MATH1116/MATH1113/MATH1013/MATH1014"],  /* also has some hardcoded weirdness */
+        incompat: ["MATH2322", "MATH3104", "MATH2320", "MATH3116"]
+    },
 ];
 
 function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
@@ -220,6 +236,15 @@ function checkPrerequisites(gridX, gridY) {
         * 2120 is 2100)
         */
         gridY++;
+    }
+
+    /* MATH2222 is weird */
+    if (code == "MATH2222" && gridY == 0) {
+        for (let i = 0; i < courseArray.length; ++i) {
+            if (gridY == 0 && courseArray[i].code == "MATH1115" && courseArray[i].gridx < COURSES_PER_SEM) {
+                return [];
+            }
+        }
     }
 
     let priorCourses = getCoursesRunningBefore(gridY);
