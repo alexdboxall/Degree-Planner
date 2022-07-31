@@ -20,16 +20,98 @@ let allCourseData = [
     {
         code: "COMP1100",
         name: "Programming as Problem Solving",
-        sem1: false,
-        sem2: false
+        sem1: true,
+        sem2: true,
+        prereq: {
+
+        }
     },
     {
         code: "COMP1130",
         name: "Programming as Problem Solving (Advanced)",
+        sem1: true,
+        sem2: false,
+        prereq: {
+
+        }
+    },
+    {
+        code: "COMP1110",
+        name: "Structured Programming",
         sem1: false,
-        sem2: false
+        sem2: true,
+        prereq: [
+            "COMP1100/COMP1130"
+        ]
+    },
+    {
+        code: "COMP1140",
+        name: "Structured Programming (Advanced)",
+        sem1: false,
+        sem2: true,
+        prereq: [
+            "COMP1130"
+        ]
     }
 ];
+
+function getCoursesRunningBefore(gridY) {
+    let output = [];
+
+    for (let i = 0; i < courseArray.length; ++i) {
+        if (courseArray[i].gridy < gridY && courseArray[i].gridx < COURSES_PER_SEM) {
+            output.push(courseArray[i]);
+        }
+    }
+
+    return output;
+}
+
+function containsCourse(courseArray, targetCode) {
+    for (let i = 0; i < courseArray.length; ++i) {
+        if (courseArray[i].code == targetCode) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function checkPrerequisites(gridX, gridY) {
+    console.log(gridX, gridY);
+
+    let course = getCourseAtPosition(gridX, gridY);
+    if (course == null) {
+        return null;
+    }
+    let code = course.code;
+    let courseData = getCourseDataFromCode(code);
+
+    let needs = [];
+
+    let priorCourses = getCoursesRunningBefore(gridY);
+    console.log(priorCourses);
+    console.log(courseData);
+
+    for (let i = 0; i < courseData.prereq.length; ++i) {
+        let found = false;
+        let ors = courseData.prereq[i].split("/");
+        console.log(ors);
+
+        for (let j = 0; j < ors.length; ++j) {
+            if (containsCourse(priorCourses, ors[j])) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            needs.push(courseData.prereq[i]);
+        }
+    }
+
+    console.log(course.code, needs);
+    return needs;
+}
 
 function setMode(simple) {
     if (simple) {
@@ -94,11 +176,32 @@ function renderCourseAtPosition(code, x, y) {
 
     let courseColour;
     if (courseData == null) {
+        // doesn't exist
         courseColour = "#808080";
-    } else if (doesCourseRunThere(code, x, y) || (draggingCourse != null && code == draggingCourse.code)) {
+
+    } else if ((draggingCourse != null && code == draggingCourse.code) || xToGridX(x) > COURSES_PER_SEM) {
+        // dragging, or in the scratch area
         courseColour = "#20C0FF";
+
     } else {
-        courseColour = "#FF4040";
+        // normal course
+        let prereq = checkPrerequisites(xToGridX(x), yToGridY(y));
+
+        if (prereq == null) {
+            // error
+            courseColour = "#404040";
+
+        } else if (prereq.length) {
+            // missing prerequisite
+            courseColour = "#FF4040";
+
+        } else if (!doesCourseRunThere(code, x, y)) {
+            // doesn't run in that semester
+            courseColour = "#FF8F40";
+
+        } else {
+            courseColour = "#20C0FF";
+        }
     }
 
     drawRectWithOutline(x, y, COURSE_WIDTH, COURSE_HEIGHT,
@@ -149,11 +252,11 @@ function getCourseDataFromCode(code) {
     return null;
 }
 
-function getCourseAtPosition(x, y) {
+function getCourseAtPosition(gridX, gridY) {
     for (let i = 0; i < courseArray.length; ++i) {
         let course = courseArray[i];
 
-        if (course.gridx == x && course.gridy == y) {
+        if (course.gridx == gridX && course.gridy == gridY) {
             return course;
         }
     }
@@ -184,15 +287,16 @@ function doesCourseRunThere(code, x, y) {
 
     let course_data = getCourseDataFromCode(code);
 
-    if (course_data == null || gridX > COURSES_PER_SEM + 1) {
-        console.log(course_data);
+    if (course_data == null || gridX >= COURSES_PER_SEM + 1) {
         return true;
     }
 
     if (gridY % 3 == 0) {
         // semester 1
         return course_data.sem1;
+
     } else {
+        // semester 2
         return course_data.sem2;
     }
 }
