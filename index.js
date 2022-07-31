@@ -1,9 +1,9 @@
 
 let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
-let COURSE_WIDTH = 200;
-let COURSE_HEIGHT = 100;
-let SCRATCH_WIDTH = 3;
+let COURSE_WIDTH = 190;
+let COURSE_HEIGHT = 90;
+let SCRATCH_WIDTH = 4;
 let MINIMUM_YEARS_REQUIRED = 4;
 let COURSES_PER_SEM_WITHOUT_OVERLOADING = 4;
 let courseArray = [];
@@ -14,10 +14,18 @@ let draggingCourseOffsetX;
 let draggingCourseOffsetY;
 
 let ERROR_MESSAGE_WIDTH = 450;
-let ERROR_MESSAGE_HEIGHT = 100;
+let ERROR_MESSAGE_HEIGHT = 150;
 
 let COURSES_PER_SEM = 6;
 let YEARS_OF_DEGREE = 5;
+
+/*
+* CURRENTLY HARDCODED:
+*
+*   COMP2120 - to allow it to be concurrently taken with COMP2100
+*   MATH2222 - is a real mess
+*
+*/
 
 let allCourseData = [
     {
@@ -26,7 +34,10 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: ["COMP1130"]
+        incompat: ["COMP1130"],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP1130",
@@ -34,7 +45,10 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: ["COMP1100"]
+        incompat: ["COMP1100"],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP1110",
@@ -42,7 +56,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1100/COMP1130"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP1140",
@@ -50,7 +67,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1130"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP1600",
@@ -58,7 +78,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1100/COMP1130", "MATH"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH1013",
@@ -66,7 +89,10 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: ["MATH1115"]
+        incompat: ["MATH1115"],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH1115",
@@ -74,7 +100,10 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH1014",
@@ -82,7 +111,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["MATH1013/MATH1115"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH1116",
@@ -90,7 +122,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["MATH1115"],
-        incompat: ["MATH1014"]
+        incompat: ["MATH1014"],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP2100",
@@ -98,7 +133,10 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: ["COMP1100/COMP1130", "COMP1110/COMP1140", "MATH"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP2120",
@@ -106,7 +144,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP2100"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP2300",
@@ -114,7 +155,10 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["COMP1100/COMP1130/COMP1730", "MATH"],
-        incompat: ["ENGN2219"]
+        incompat: ["ENGN2219"],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP2310",
@@ -122,7 +166,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1110/COMP1140", "COMP2300"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP2420",
@@ -130,7 +177,10 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["COMP1100/COMP1130"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "COMP3600",
@@ -138,7 +188,10 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1110/COMP1140", "COMP2", "COMP1600/MATH2"],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH1005",
@@ -146,7 +199,10 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: []
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
     },
     {
         code: "MATH2222",
@@ -154,7 +210,76 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["MATH1116/MATH1113/MATH1013/MATH1014"],  /* also has some hardcoded weirdness */
-        incompat: ["MATH2322", "MATH3104", "MATH2320", "MATH3116"]
+        incompat: ["MATH2322", "MATH3104", "MATH2320", "MATH3116"],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP4450",
+        name: "Advanced Computing Research Methods",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        incompat: [],
+        warning: "Permission code required.",
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP2550",
+        name: "Advanced Computing R&D Methods",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        incompat: [],
+        warning: "Must be enrolled in the Bachelor of Advanced Computing (Research & Development).",
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP2560",
+        name: "Studies in Advanced Computing R&D ",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP2550"],
+        incompat: [],
+        warning: "Must be enrolled in the Bachelor of Advanced Computing (Research & Development).",
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "STAT1003",
+        name: "Statistical Techniques",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        incompat: ["STAT1008"],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "STAT1008",
+        name: "Quantitative Research Methods",
+        sem1: true,
+        sem2: true,
+        prereq: [],
+        incompat: ["STAT1003"],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP3820",
+        name: "Computing Internship",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        incompat: [],
+        warning: "Permission code required.",
+        wide: true,
+        tall: false,
     },
 ];
 
@@ -337,8 +462,8 @@ function renderErrorMessage(message, x, y) {
     drawRectWithOutline(x, y, ERROR_MESSAGE_WIDTH, ERROR_MESSAGE_HEIGHT, "#E0E0E0", "#000000", 1);
 
     context.fillStyle = "#000000";
-    context.font = "15px Arial";
-    renderWrappedText(message, x + 20, y + 20, ERROR_MESSAGE_WIDTH);
+    context.font = "14px Arial";
+    renderWrappedText(message, x + 20, y + 20, ERROR_MESSAGE_WIDTH - 30);
 }
 
 function formatCodes(code) {
@@ -364,7 +489,7 @@ function renderCourseAtPosition(code, x, y) {
 
     let errorMessage = "";
 
-    let courseColour;
+    let courseColour = "#20C0FF";
     if (courseData == null) {
         // doesn't exist
         courseColour = "#808080";
@@ -381,22 +506,24 @@ function renderCourseAtPosition(code, x, y) {
         if (prereq == null) {
             alert("ERROR");
 
-        } else if (incompat != null) {
+        }
+        if (incompat != null) {
             // incompatible courses
             courseColour = "#FF4040";
-            errorMessage = "Incompatible with " + incompat
-
-        } else if (!doesCourseRunThere(code, x, y)) {
+            errorMessage += "- Incompatible with " + incompat + "\n"
+        }
+        if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
             courseColour = "#FF4040";
-            errorMessage = (yToGridY(y) % 3 == 0)
-                ? "Does not run in semester 1"
-                : "Does not run in semester 2";
+            errorMessage += (yToGridY(y) % 3 == 0)
+                ? "- Does not run in semester 1\n"
+                : "- Does not run in semester 2\n";
 
-        } else if (prereq.length) {
+        }
+        if (prereq.length) {
             // missing prerequisite
 
-            let prereqStr = "    ";
+            let prereqStr = "       ";
             for (let i = 0; i < prereq.length; ++i) {
                 let formatted = formatCodes(prereq[i]);
 
@@ -407,32 +534,44 @@ function renderCourseAtPosition(code, x, y) {
                 }
 
                 if (i != prereq.length - 1) {
-                    prereqStr += " AND\n    ";
+                    prereqStr += " AND\n       ";
                 }
             }
 
             courseColour = "#FF4040";
-            errorMessage = "Missing prerequisite(s):\n" + prereqStr;
+            errorMessage += "- Missing prerequisite(s):\n" + prereqStr;
+            if (code == "MATH2222") {
+                errorMessage += "\n       (May be done alongside MATH1115 in first year instead)";
+            }
+            errorMessage += "\n";
+        }
+        if (courseData.warning != null) {
+            if (errorMessage == "") courseColour = "#EEEE22";
+            errorMessage += "- " + courseData.warning;
 
-        } else {
-            courseColour = "#20C0FF";
         }
     }
 
-    drawRectWithOutline(x, y, COURSE_WIDTH, COURSE_HEIGHT,
+    let width = COURSE_WIDTH;
+    let height = COURSE_HEIGHT;
+    if (courseData != null) {
+        if (courseData.tall) height *= 2;
+        if (courseData.wide) width *= 2;
+    }
+    drawRectWithOutline(x, y, width, height,
         courseColour, "#000000", 1);
 
     context.fillStyle = "#000000";
-    context.font = "16px Arial";
+    context.font = "15px Arial";
     context.fillText(code, x + 5, y + 25);
 
-    context.font = "15px Arial";
+    context.font = "14px Arial";
     renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, COURSE_WIDTH - 10);
 
     if (errorMessage.length != 0) {
         let warningIcon = new Image();
         warningIcon.src = "warning.png";
-        context.drawImage(warningIcon, x + COURSE_WIDTH - 40, y + COURSE_HEIGHT - 40, 32, 32);
+        context.drawImage(warningIcon, x + width - 40, y + height - 40, 32, 32);
     }
 
     return errorMessage;
@@ -452,11 +591,19 @@ function rerender(mouseX, mouseY) {
     let mouseGridY = yToGridY(mouseY);
 
     let errorMessage = null;
-
+    let errorCourse = null;
     for (let i = 0; i < courseArray.length; i++) {
         let message = renderCourse(courseArray[i]);
-        if (message != "" && mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy) {
+        let courseData = getCourseDataFromCode(courseArray[i].code);
+
+        /* It's called a HACKathon for a reason */
+        if (message != "" &&
+            ((mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy) ||
+                (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy && courseData && courseData.wide) ||
+                (mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall)
+            )) {
             errorMessage = message;
+            errorCourse = courseArray[i];
         }
     }
 
@@ -464,7 +611,18 @@ function rerender(mouseX, mouseY) {
         renderCourseAtPosition(draggingCourse.code, mouseX - draggingCourseOffsetX, mouseY - draggingCourseOffsetY);
 
     } else if (errorMessage != null) {
-        if ((mouseX % COURSE_WIDTH) >= COURSE_WIDTH - 40 && (mouseY % COURSE_HEIGHT) >= COURSE_HEIGHT - 40) {
+        let errorCourseData = getCourseDataFromCode(errorCourse.code);
+
+        let width = COURSE_WIDTH;
+        let height = COURSE_HEIGHT;
+        if (errorCourseData != null) {
+            if (errorCourseData.tall) height *= 2;
+            if (errorCourseData.wide) width *= 2;
+        }
+
+        let baseX = errorCourse.gridx * COURSE_WIDTH;
+        let baseY = errorCourse.gridy * COURSE_HEIGHT;
+        if (mouseX - baseX >= width - 40 && mouseY - baseY >= height - 40) {
             renderErrorMessage(errorMessage, mouseX, mouseY);
         }
     }
@@ -590,7 +748,9 @@ function mouseUpHandler(e) {
     let x = xToGridX(e.offsetX- draggingCourseOffsetX + COURSE_WIDTH / 2);
     let y = yToGridY(e.offsetY- draggingCourseOffsetY + COURSE_HEIGHT / 2);
 
-    if (isGridPositionIllegal(x, y, draggingCourse.long, draggingCourse.tall)) {
+    let courseData = getCourseDataFromCode(draggingCourse.code);
+
+    if (isGridPositionIllegal(x, y, courseData != null && courseData.wide, courseData != null && courseData.tall)) {
         // return to original position, as invalid
         x = draggingCourseOriginalGridX;
         y = draggingCourseOriginalGridY;
@@ -620,7 +780,7 @@ function addBasicCourses() {
     let scratchInitialPosition = COURSES_PER_SEM + 1;
 
     for (let i = 0; i < allCourseData.length; ++i) {
-        addCourse(allCourseData[i].code, scratchInitialPosition + i % 3, Math.floor(i / 3));
+        addCourse(allCourseData[i].code, scratchInitialPosition + i % SCRATCH_WIDTH, Math.floor(i / SCRATCH_WIDTH));
     }
 }
 
