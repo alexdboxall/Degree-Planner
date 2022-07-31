@@ -48,9 +48,16 @@ function getText(url) {
     }
 }
 
-let text = getText("courses.json");
-console.log(text);
-let allCourseData = JSON.parse(text);
+let allCourseData = null;
+$.get( "https://raw.githubusercontent.com/alexdboxall/Degree-Planner/main/courses.json", function( data ) {
+    console.log(data);
+    console.log(JSON.parse(data));
+    allCourseData = JSON.parse(data).data;
+});
+
+if (allCourseData == null) {
+    alert("uh-oh! the JSON couldn't be loaded");
+}
 
 function setMode(simple) {
     if (simple) {
