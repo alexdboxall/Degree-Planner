@@ -124,6 +124,22 @@ let allCourseData = [
         prereq: ["COMP1110/COMP1140", "COMP2300"],
         incompat: []
     },
+    {
+        code: "COMP2420",
+        name: "Introduction to Data Management, Analysis and Security",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP1100/COMP1130"],
+        incompat: []
+    },
+    {
+        code: "COMP3600",
+        name: "Algorithms",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP1110/COMP1140", "COMP2", "COMP1600/MATH2"],
+        incompat: []
+    },
 ];
 
 function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
@@ -348,7 +364,7 @@ function renderCourseAtPosition(code, x, y) {
         } else if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
             courseColour = "#FF4040";
-            errorMessage = courseData.sem2 && (yToGridY(y) & 3 == 0)
+            errorMessage = (yToGridY(y) % 3 == 0)
                 ? "Does not run in semester 1"
                 : "Does not run in semester 2";
 
