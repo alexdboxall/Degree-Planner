@@ -16,48 +16,20 @@ let draggingCourseOffsetY;
 let COURSES_PER_SEM = 6;
 let YEARS_OF_DEGREE = 5;
 
-
-// from here: https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript
-var getJSON = function(url, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.responseType = 'json';
-    xhr.onload = function() {
-        var status = xhr.status;
-        if (status === 200) {
-            callback(null, xhr.response);
-        } else {
-            callback(status, xhr.response);
-        }
-    };
-    xhr.send();
-};
-
-function getText(url) {
-    // read text from URL location
-    var request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.send(null);
-    request.onreadystatechange = function () {
-        if (request.readyState === 4 && request.status === 200) {
-            var type = request.getResponseHeader('Content-Type');
-            if (type.indexOf("text") !== 1) {
-                return request.responseText;
-            }
-        }
+let allCourseData = [
+    {
+        code: "COMP1100",
+        name: "Programming as Problem Solving",
+        sem1: false,
+        sem2: false
+    },
+    {
+        code: "COMP1130",
+        name: "Programming as Problem Solving (Advanced)",
+        sem1: false,
+        sem2: false
     }
-}
-
-let allCourseData = null;
-$.get( "https://raw.githubusercontent.com/alexdboxall/Degree-Planner/main/courses.json", function( data ) {
-    console.log(data);
-    console.log(JSON.parse(data));
-    allCourseData = JSON.parse(data).data;
-});
-
-if (allCourseData == null) {
-    alert("uh-oh! the JSON couldn't be loaded");
-}
+];
 
 function setMode(simple) {
     if (simple) {
