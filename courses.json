@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "code": "COMP1100",
+      "name": "Programming as Problem Solving",
+      "sem1": true,
+      "sem2": true,
+    },
+    {
+      "code": "COMP1130",
+      "name": "Programming as Problem Solving (Advanced)",
+      "sem1": true,
+      "sem2": false,
+    }
+  ]
+}

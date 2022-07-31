@@ -1,8 +1,8 @@
 
 let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
-let COURSE_WIDTH = 150;
-let COURSE_HEIGHT = 80;
+let COURSE_WIDTH = 200;
+let COURSE_HEIGHT = 100;
 let SCRATCH_WIDTH = 3;
 let MINIMUM_YEARS_REQUIRED = 4;
 let COURSES_PER_SEM_WITHOUT_OVERLOADING = 4;
@@ -15,6 +15,42 @@ let draggingCourseOffsetY;
 
 let COURSES_PER_SEM = 6;
 let YEARS_OF_DEGREE = 5;
+
+
+// from here: https://stackoverflow.com/questions/12460378/how-to-get-json-from-url-in-javascript
+var getJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+        var status = xhr.status;
+        if (status === 200) {
+            callback(null, xhr.response);
+        } else {
+            callback(status, xhr.response);
+        }
+    };
+    xhr.send();
+};
+
+function getText(url) {
+    // read text from URL location
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.send(null);
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            var type = request.getResponseHeader('Content-Type');
+            if (type.indexOf("text") !== 1) {
+                return request.responseText;
+            }
+        }
+    }
+}
+
+let text = getText("courses.json");
+console.log(text);
+let allCourseData = JSON.parse(text);
 
 function setMode(simple) {
     if (simple) {
@@ -59,24 +95,49 @@ function clearCanvas() {
     }
 }
 
-function calculateCourseColour(code, year, sem) {
-    return "#20C0FF";
+function renderWrappedText(text, x, y, maxWidth) {
+    let wordsRemaining = text.split(' ');
+
+    while (wordsRemaining.length > 0) {
+        let soFar = "";
+        while (context.measureText(soFar + wordsRemaining[0]).width < maxWidth && wordsRemaining.length > 0) {
+            soFar += wordsRemaining[0] + " ";
+            wordsRemaining.splice(0, 1);
+        }
+
+        context.fillText(soFar, x, y);
+        y += 20;
+    }
 }
 
-function renderCourseAtPosition(course, x, y) {
+function renderCourseAtPosition(code, x, y) {
+    let courseData = getCourseDataFromCode(code);
+
+    let courseColour;
+    if (courseData == null) {
+        courseColour = "#808080";
+    } else if (doesCourseRunThere(code, x, y) || (draggingCourse != null && code == draggingCourse.code)) {
+        courseColour = "#20C0FF";
+    } else {
+        courseColour = "#FF4040";
+    }
+
     drawRectWithOutline(x, y, COURSE_WIDTH, COURSE_HEIGHT,
-        "#20C0FF", "#000000", 1);
+        courseColour, "#000000", 1);
 
     context.fillStyle = "#000000";
     context.font = "16px Arial";
-    context.fillText(course.code, x + 5, y + 25);
+    context.fillText(code, x + 5, y + 25);
+
+    context.font = "15px Arial";
+    renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, COURSE_WIDTH - 10);
 }
 
 function renderCourse(course) {
     let x = course.gridx * COURSE_WIDTH;
     let y = course.gridy * COURSE_HEIGHT;
 
-    renderCourseAtPosition(course, x, y);
+    renderCourseAtPosition(course.code, x, y);
 }
 
 function rerender(mouseX, mouseY) {
@@ -87,7 +148,7 @@ function rerender(mouseX, mouseY) {
     }
 
     if (draggingCourse != null) {
-        renderCourseAtPosition(draggingCourse, mouseX - draggingCourseOffsetX, mouseY - draggingCourseOffsetY);
+        renderCourseAtPosition(draggingCourse.code, mouseX - draggingCourseOffsetX, mouseY - draggingCourseOffsetY);
     }
 }
 
@@ -97,6 +158,16 @@ function addCourse(code, gridx, gridy) {
         gridy: gridy,
         code: code,
     });
+}
+
+function getCourseDataFromCode(code) {
+    for (let i = 0; i < allCourseData.length; ++i) {
+        if (allCourseData[i].code == code) {
+            return allCourseData[i];
+        }
+    }
+
+    return null;
 }
 
 function getCourseAtPosition(x, y) {
@@ -128,10 +199,26 @@ function yToGridY(y) {
     return Math.round((y - COURSE_HEIGHT / 2) / COURSE_HEIGHT);
 }
 
-function mouseDownHandler(e) {
-    //e.preventDefault();
-    //e.stopPropagation();
+function doesCourseRunThere(code, x, y) {
+    let gridX = xToGridX(x);
+    let gridY = yToGridY(y);
 
+    let course_data = getCourseDataFromCode(code);
+
+    if (course_data == null || gridX > COURSES_PER_SEM + 1) {
+        console.log(course_data);
+        return true;
+    }
+
+    if (gridY % 3 == 0) {
+        // semester 1
+        return course_data.sem1;
+    } else {
+        return course_data.sem2;
+    }
+}
+
+function mouseDownHandler(e) {
     let x = xToGridX(e.offsetX);
     let y = yToGridY(e.offsetY);
 
@@ -215,22 +302,16 @@ function addBasicCourses() {
 
     let scratchInitialPosition = COURSES_PER_SEM + 1;
 
-    let compulsory = [
+    let course_list = [
+        "COMP1100",
         "COMP1130",
+        "COMP1110",
         "COMP1140",
         "COMP1600",
-        "COMP2100",
-        "COMP2120",
-        "COMP2300",
-        "COMP2310",
-        "COMP2420",
-        "COMP2550",
-        "COMP2560",
-        "COMP3600",
     ]
 
-    for (let i = 0; i < compulsory.length; ++i) {
-        addCourse(compulsory[i], scratchInitialPosition + i % 3, Math.floor(i / 3));
+    for (let i = 0; i < course_list.length; ++i) {
+        addCourse(course_list[i], scratchInitialPosition + i % 3, Math.floor(i / 3));
     }
 }
 
