@@ -341,7 +341,7 @@ function renderCourseAtPosition(code, x, y) {
             for (let i = 0; i < prereq.length; ++i) {
                 let formatted = formatCodes(prereq[i]);
 
-                if (formatted.indexOf(" or") == -1) {
+                if (formatted.indexOf(" or") == -1 || prereq.length == 1) {
                     prereqStr += formatted;
                 } else {
                     prereqStr += "(" + formatted + ")";
