@@ -108,6 +108,22 @@ let allCourseData = [
         prereq: ["COMP2100"],
         incompat: []
     },
+    {
+        code: "COMP2300",
+        name: "Computer Organisation and Program Execution",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP1100/COMP1130/COMP1730", "MATH"],
+        incompat: ["ENGN2219"]
+    },
+    {
+        code: "COMP2310",
+        name: "Systems, Networks, and Concurrency",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP1110/COMP1140", "COMP2300"],
+        incompat: []
+    },
 ];
 
 function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
@@ -332,7 +348,9 @@ function renderCourseAtPosition(code, x, y) {
         } else if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
             courseColour = "#FF4040";
-            errorMessage = "Does not run in this semester";
+            errorMessage = courseData.sem2 && (yToGridY(y) & 3 == 0)
+                ? "Does not run in semester 1"
+                : "Does not run in semester 2";
 
         } else if (prereq.length) {
             // missing prerequisite
@@ -560,22 +578,8 @@ function addBasicCourses() {
 
     let scratchInitialPosition = COURSES_PER_SEM + 1;
 
-    let course_list = [
-        "COMP1100",
-        "COMP1130",
-        "COMP1110",
-        "COMP1140",
-        "COMP1600",
-        "MATH1013",
-        "MATH1014",
-        "MATH1115",
-        "MATH1116",
-        "COMP2100",
-        "COMP2120",
-    ]
-
-    for (let i = 0; i < course_list.length; ++i) {
-        addCourse(course_list[i], scratchInitialPosition + i % 3, Math.floor(i / 3));
+    for (let i = 0; i < allCourseData.length; ++i) {
+        addCourse(allCourseData[i].code, scratchInitialPosition + i % 3, Math.floor(i / 3));
     }
 }
 
