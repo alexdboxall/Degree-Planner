@@ -13,6 +13,9 @@ let draggingCourseOriginalGridY;
 let draggingCourseOffsetX;
 let draggingCourseOffsetY;
 
+let ERROR_MESSAGE_WIDTH = 450;
+let ERROR_MESSAGE_HEIGHT = 100;
+
 let COURSES_PER_SEM = 6;
 let YEARS_OF_DEGREE = 5;
 
@@ -63,7 +66,7 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: []
+        incompat: ["MATH1115"]
     },
     {
         code: "MATH1115",
@@ -87,7 +90,7 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["MATH1115"],
-        incompat: []
+        incompat: ["MATH1014"]
     },
     {
         code: "COMP2100",
@@ -171,8 +174,6 @@ function checkPrerequisites(gridX, gridY) {
     let needs = [];
 
     let priorCourses = getCoursesRunningBefore(gridY);
-    console.log(priorCourses);
-    console.log(courseData);
 
     for (let i = 0; i < courseData.prereq.length; ++i) {
         let found = false;
@@ -191,7 +192,6 @@ function checkPrerequisites(gridX, gridY) {
         }
     }
 
-    console.log(course.code, needs);
     return needs;
 }
 
@@ -239,11 +239,17 @@ function clearCanvas() {
 }
 
 function renderWrappedText(text, x, y, maxWidth) {
-    let wordsRemaining = text.split(' ');
+    let wordsRemaining = text.replaceAll("\n", " \n ").split(" ");
+
+    console.log("WORDS: " + wordsRemaining);
 
     while (wordsRemaining.length > 0) {
         let soFar = "";
         while (context.measureText(soFar + wordsRemaining[0]).width < maxWidth && wordsRemaining.length > 0) {
+            if (wordsRemaining[0] == "\n") {
+                wordsRemaining.splice(0, 1);
+                break;
+            }
             soFar += wordsRemaining[0] + " ";
             wordsRemaining.splice(0, 1);
         }
@@ -253,13 +259,43 @@ function renderWrappedText(text, x, y, maxWidth) {
     }
 }
 
+function renderErrorMessage(message, x, y) {
+    drawRectWithOutline(x, y, ERROR_MESSAGE_WIDTH, ERROR_MESSAGE_HEIGHT, "#E0E0E0", "#000000", 1);
+
+    context.fillStyle = "#000000";
+    context.font = "15px Arial";
+    renderWrappedText(message, x + 10, y + 20, ERROR_MESSAGE_WIDTH);
+}
+
+function formatCodes(code) {
+    let codes = code.split("/");
+    let output = "";
+
+    for (let i = 0; i < codes.length; ++i) {
+        let last = i == codes.length - 1;
+        if (codes[i].length == 4) {
+            output += "any " + codes[i] + " course" + (last ? "" : ", or ");
+        } else if (codes[i].length == 5) {
+            output += "any " + codes[i] + "xxx-level course" + (last ? "" : ", or ");
+        } else {
+            output += codes[i] + (last ? "" : " or ");
+        }
+    }
+
+    return output;
+}
+
 function renderCourseAtPosition(code, x, y) {
     let courseData = getCourseDataFromCode(code);
+
+    let errorMessage = "";
 
     let courseColour;
     if (courseData == null) {
         // doesn't exist
         courseColour = "#808080";
+
+        errorMessage = "Unknown course...";
 
     } else if ((draggingCourse != null && code == draggingCourse.code) || xToGridX(x) > COURSES_PER_SEM) {
         // dragging, or in the scratch area
@@ -268,21 +304,41 @@ function renderCourseAtPosition(code, x, y) {
     } else {
         // normal course
         let prereq = checkPrerequisites(xToGridX(x), yToGridY(y));
-        let incompats = checkIncompatibilities(xToGridX(x), yToGridY(y));
+        let incompat = checkIncompatibilities(xToGridX(x), yToGridY(y));
 
         if (prereq == null) {
             alert("ERROR");
 
-        } else if (incompats != null) {
-            courseColour = "#FF4090";
+        } else if (incompat != null) {
+            // incompatible courses
+            courseColour = "#FF4040";
+            errorMessage = "Incompatible with " + incompat
 
         } else if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
-            courseColour = "#FF8F40";
+            courseColour = "#FF4040";
+            errorMessage = "Does not run in this semester";
 
         } else if (prereq.length) {
             // missing prerequisite
+
+            let prereqStr = "    ";
+            for (let i = 0; i < prereq.length; ++i) {
+                let formatted = formatCodes(prereq[i]);
+
+                if (formatted.indexOf(" or") == -1) {
+                    prereqStr += formatted;
+                } else {
+                    prereqStr += "(" + formatted + ")";
+                }
+
+                if (i != prereq.length - 1) {
+                    prereqStr += " AND\n    ";
+                }
+            }
+
             courseColour = "#FF4040";
+            errorMessage = "Missing prerequisite(s):\n" + prereqStr;
 
         } else {
             courseColour = "#20C0FF";
@@ -298,24 +354,37 @@ function renderCourseAtPosition(code, x, y) {
 
     context.font = "15px Arial";
     renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, COURSE_WIDTH - 10);
+
+    return errorMessage;
 }
 
 function renderCourse(course) {
     let x = course.gridx * COURSE_WIDTH;
     let y = course.gridy * COURSE_HEIGHT;
 
-    renderCourseAtPosition(course.code, x, y);
+    return renderCourseAtPosition(course.code, x, y);
 }
 
 function rerender(mouseX, mouseY) {
     clearCanvas();
 
+    let mouseGridX = xToGridX(mouseX);
+    let mouseGridY = yToGridY(mouseY);
+
+    let errorMessage = null;
+
     for (let i = 0; i < courseArray.length; i++) {
-        renderCourse(courseArray[i]);
+        let message = renderCourse(courseArray[i]);
+        if (message != "" && mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy) {
+            errorMessage = message;
+        }
     }
 
     if (draggingCourse != null) {
         renderCourseAtPosition(draggingCourse.code, mouseX - draggingCourseOffsetX, mouseY - draggingCourseOffsetY);
+
+    } else if (errorMessage != null) {
+        renderErrorMessage(errorMessage, mouseX, mouseY);
     }
 }
 
@@ -455,9 +524,7 @@ function mouseUpHandler(e) {
 }
 
 function mouseMoveHandler(e) {
-    if (draggingCourse != null) {
-        rerender(e.offsetX, e.offsetY);
-    }
+    rerender(e.offsetX, e.offsetY);
 }
 
 function resizeCanvas(e) {
