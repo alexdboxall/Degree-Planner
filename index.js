@@ -34,7 +34,8 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: ["COMP1130"],
+        areaprereq: [],
+		incompat: ["COMP1130"],
         warning: null,
         wide: false,
         tall: false,
@@ -45,7 +46,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: ["COMP1100"],
+        areaprereq: [],
+		incompat: ["COMP1100"],
         warning: null,
         wide: false,
         tall: false,
@@ -56,7 +58,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1100/COMP1130"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -67,7 +70,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1130"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -78,7 +82,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1100/COMP1130", "MATH"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -89,7 +94,8 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: ["MATH1115"],
+        areaprereq: [],
+		incompat: ["MATH1115"],
         warning: null,
         wide: false,
         tall: false,
@@ -100,7 +106,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -111,7 +118,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["MATH1013/MATH1115"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -122,7 +130,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["MATH1115"],
-        incompat: ["MATH1014"],
+        areaprereq: [],
+		incompat: ["MATH1014"],
         warning: null,
         wide: false,
         tall: false,
@@ -133,7 +142,8 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: ["COMP1100/COMP1130", "COMP1110/COMP1140", "MATH"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -144,7 +154,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP2100"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -155,7 +166,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["COMP1100/COMP1130/COMP1730", "MATH"],
-        incompat: ["ENGN2219"],
+        areaprereq: [],
+		incompat: ["ENGN2219"],
         warning: null,
         wide: false,
         tall: false,
@@ -166,7 +178,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1110/COMP1140", "COMP2300"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -177,7 +190,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["COMP1100/COMP1130"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -188,7 +202,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP1110/COMP1140", "COMP2", "COMP1600/MATH2"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -199,7 +214,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -210,7 +226,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: ["MATH1116/MATH1113/MATH1013/MATH1014"],  /* also has some hardcoded weirdness */
-        incompat: ["MATH2322", "MATH3104", "MATH2320", "MATH3116"],
+        areaprereq: [],
+		incompat: ["MATH2322", "MATH3104", "MATH2320", "MATH3116"],
         warning: null,
         wide: false,
         tall: false,
@@ -221,7 +238,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: "Permission code required.",
         wide: false,
         tall: false,
@@ -232,7 +250,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: "Must be enrolled in the Bachelor of Advanced Computing (Research & Development).",
         wide: false,
         tall: false,
@@ -243,7 +262,8 @@ let allCourseData = [
         sem1: false,
         sem2: true,
         prereq: ["COMP2550"],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: "Must be enrolled in the Bachelor of Advanced Computing (Research & Development).",
         wide: false,
         tall: false,
@@ -254,7 +274,8 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: ["STAT1008"],
+        areaprereq: [],
+		incompat: ["STAT1008"],
         warning: null,
         wide: false,
         tall: false,
@@ -265,7 +286,8 @@ let allCourseData = [
         sem1: true,
         sem2: true,
         prereq: [],
-        incompat: ["STAT1003"],
+        areaprereq: [],
+		incompat: ["STAT1003"],
         warning: null,
         wide: false,
         tall: false,
@@ -276,9 +298,118 @@ let allCourseData = [
         sem1: true,
         sem2: false,
         prereq: [],
-        incompat: [],
+        areaprereq: [],
+		incompat: [],
         warning: "Permission code required.",
         wide: true,
+        tall: false,
+    },
+    {
+        code: "COMP4550",
+        name: "Advanced Computing Research Project",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        areaprereq: [],
+		incompat: [],
+        warning: "Permission code, and a lot of other things, required.",
+        wide: true,
+        tall: true,
+    },
+    {
+        code: "COMP4560",
+        name: "Advanced Computing Project",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        areaprereq: [],
+		incompat: ["COMP4500", "COMP4550"],
+        warning: "Must be enrolled in a Bachelor of Advanced Computing, or a Bachelor of Advanced Computing / Science.",
+        wide: false,
+        tall: true,
+    },
+    {
+        code: "COMP4500",
+        name: "Software Engineering Practice",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP2120", "COMP3120", "COMP3500"],
+        areaprereq: [],
+		incompat: ["COMP4540"],
+        warning: null,
+        wide: false,
+        tall: true,
+    },
+    {
+        code: "COMP3500",
+        name: "Software Engineering Project",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP2100", "COMP2120"],
+        areaprereq: ["12 COMP2"],
+		incompat: [],
+        warning: null,
+        wide: false,
+        tall: true,
+    },
+    {
+        code: "COMP3120",
+        name: "Managing Software Development",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP2120/INFS2024"],
+        areaprereq: [],
+		incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP3120",
+        name: "Managing Software Development",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP2120/INFS2024"],
+        areaprereq: [],
+		incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP2620",
+        name: "Logic",
+        sem1: true,
+        sem2: false,
+        prereq: [],
+        areaprereq: ["12 COMP/MATH"],
+		incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP3620",
+        name: "Artificial Intelligence",
+        sem1: true,
+        sem2: false,
+        prereq: ["COMP1110/COMP1140", "COMP2620"],
+        areaprereq: [],
+		incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP4620",
+        name: "Advanced Topics in Artificial Intelligence",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP3620"],
+        areaprereq: [],
+		incompat: [],
+        warning: null,
+        wide: false,
         tall: false,
     },
 ];
@@ -310,19 +441,20 @@ function getCoursesRunningBefore(gridY) {
     return output;
 }
 
-function containsCourse(courseArray, targetCode) {
+function containsCourse(array, targetCode) {
     /*
     * Only checks to the length of the targetCode string
     *
     * This means things like COMP3 will match all COMP3xxx courses,
     * and MATH will match all MATHxxxx courses.
     */
-    for (let i = 0; i < courseArray.length; ++i) {
-        if (courseArray[i].code.substr(0, targetCode.length) == targetCode) {
-            return true;
+
+    for (let i = 0; i < array.length; ++i) {
+        if (array[i].code.substr(0, targetCode.length) == targetCode) {
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
 function checkIncompatibilities(gridX, gridY) {
@@ -336,12 +468,42 @@ function checkIncompatibilities(gridX, gridY) {
     let priorAndConcurrentCourses = getCoursesRunningBeforeAndConcurrently(gridY, code);
 
     for (let i = 0; i < courseData.incompat.length; ++i) {
-        if (containsCourse(priorAndConcurrentCourses, courseData.incompat[i])) {
+        if (containsCourse(priorAndConcurrentCourses, courseData.incompat[i]) != -1) {
             return courseData.incompat[i];
         }
     }
 
     return null;
+}
+
+function calculateAreaPrerequisites(courseData, needs, remaining) {
+    for (let i = 0; i < courseData.areaprereq.length; ++i) {
+        let amount = parseInt(courseData.areaprereq[i].split(' ')[0]);
+        let ors = courseData.areaprereq[i].split(' ')[1].split('/');
+
+        // 6 units per regular course
+        amount = Math.floor(amount / 6);
+
+        let amountFound = 0;
+
+        for (let j = 0; j < ors.length && remaining.length > 0; ++j) {
+            let index = 0;
+            console.log(remaining);
+            while (index != -1 && remaining.length > 0) {
+                index = containsCourse(remaining, ors[j]);
+                if (index != -1) {
+                    remaining.splice(index, 1);
+                    amountFound++;
+                }
+            }
+        }
+
+        if (amountFound < amount) {
+            needs.push("*" + ((amount - amountFound) * 6) + " " + courseData.areaprereq[i].split(' ')[1]);
+        }
+    }
+
+    return needs;
 }
 
 function checkPrerequisites(gridX, gridY) {
@@ -373,6 +535,7 @@ function checkPrerequisites(gridX, gridY) {
     }
 
     let priorCourses = getCoursesRunningBefore(gridY);
+    let otherCourses = getCoursesRunningBefore(gridY);
 
     for (let i = 0; i < courseData.prereq.length; ++i) {
         let found = false;
@@ -380,10 +543,10 @@ function checkPrerequisites(gridX, gridY) {
         console.log(ors);
 
         for (let j = 0; j < ors.length; ++j) {
-            if (containsCourse(priorCourses, ors[j])) {
+            if (containsCourse(priorCourses, ors[j]) != -1) {
                 found = true;
-                break;
             }
+            otherCourses.splice(otherCourses.indexOf(ors[j], 1));
         }
 
         if (!found) {
@@ -391,7 +554,7 @@ function checkPrerequisites(gridX, gridY) {
         }
     }
 
-    return needs;
+    return calculateAreaPrerequisites(courseData, needs, otherCourses);
 }
 
 function setMode(simple) {
@@ -467,6 +630,26 @@ function renderErrorMessage(message, x, y) {
 }
 
 function formatCodes(code) {
+    if (code[0] == '*') {
+        alert(code);
+        let amount = parseInt(code.substring(1).split(" ")[0]);
+        let codes = code.split(" ")[1].split("/");
+
+        let output = amount + "+ units of any ";
+
+        for (let i = 0; i < codes.length; ++i) {
+            let last = i == codes.length - 1;
+
+            if (codes[i].length == 4) {
+                output += codes[i] + (last ? " courses" : " or ");
+            } else {
+                output += codes[i] + "xxx" + (last ? "-level courses" : "- or ");
+            }
+        }
+
+        return output;
+    }
+
     let codes = code.split("/");
     let output = "";
 
@@ -600,7 +783,8 @@ function rerender(mouseX, mouseY) {
         if (message != "" &&
             ((mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy) ||
                 (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy && courseData && courseData.wide) ||
-                (mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall)
+                (mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall) ||
+                (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall && courseData.wide)
             )) {
             errorMessage = message;
             errorCourse = courseArray[i];
