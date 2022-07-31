@@ -646,6 +646,43 @@ function getCourseDataFromCode(code) {
     return null;
 }
 
+function getCourseAtPositionViaMouse(gridX, gridY) {
+    let course = getCourseAtPosition(gridX, gridY);
+    if (course != null) return course;
+
+    if (gridX > 0) {
+        let otherCourse = getCourseAtPosition(gridX - 1, gridY);
+        if (otherCourse) {
+            let otherData = getCourseDataFromCode(otherCourse.code);
+            if (otherData && otherData.wide) {
+                return otherCourse;
+            }
+        }
+    }
+
+    if (gridY > 0) {
+        let otherCourse = getCourseAtPosition(gridX, gridY - 1);
+        if (otherCourse) {
+            let otherData = getCourseDataFromCode(otherCourse.code);
+            if (otherData && otherData.tall) {
+                return otherCourse;
+            }
+        }
+    }
+
+    if (gridX > 0 && gridY > 0) {
+        let otherCourse = getCourseAtPosition(gridX - 1, gridY - 1);
+        if (otherCourse) {
+            let otherData = getCourseDataFromCode(otherCourse.code);
+            if (otherData && otherData.wide && otherData.tall) {
+                return otherCourse;
+            }
+        }
+    }
+
+    return null;
+}
+
 function getCourseAtPosition(gridX, gridY) {
     for (let i = 0; i < courseArray.length; ++i) {
         let course = courseArray[i];
@@ -699,15 +736,15 @@ function mouseDownHandler(e) {
     let x = xToGridX(e.offsetX);
     let y = yToGridY(e.offsetY);
 
-    let course = getCourseAtPosition(x, y);
+    let course = getCourseAtPositionViaMouse(x, y);
 
     if (course != null) {
         removeCourse(course);
-        draggingCourseOriginalGridX = x;
-        draggingCourseOriginalGridY = y;
+        draggingCourseOriginalGridX = course.gridx;
+        draggingCourseOriginalGridY = course.gridy;
 
-        draggingCourseOffsetX = e.offsetX - x * COURSE_WIDTH;
-        draggingCourseOffsetY = e.offsetY - y * COURSE_HEIGHT;
+        draggingCourseOffsetX = e.offsetX - course.gridx * COURSE_WIDTH;
+        draggingCourseOffsetY = e.offsetY - course.gridy * COURSE_HEIGHT;
     }
 
     draggingCourse = course;
@@ -750,7 +787,12 @@ function mouseUpHandler(e) {
 
     let courseData = getCourseDataFromCode(draggingCourse.code);
 
-    if (isGridPositionIllegal(x, y, courseData != null && courseData.wide, courseData != null && courseData.tall)) {
+    if (isGridPositionIllegal(x, y, courseData != null && courseData.wide, courseData != null && courseData.tall) ||
+        getCourseAtPositionViaMouse(x, y) != null) {
+        /*
+        * second conditional ensures we don't drag a course to the back end of a wide/tall course
+        */
+
         // return to original position, as invalid
         x = draggingCourseOriginalGridX;
         y = draggingCourseOriginalGridY;
