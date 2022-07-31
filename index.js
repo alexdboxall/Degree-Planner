@@ -365,18 +365,6 @@ let allCourseData = [
         tall: false,
     },
     {
-        code: "COMP3120",
-        name: "Managing Software Development",
-        sem1: true,
-        sem2: false,
-        prereq: ["COMP2120/INFS2024"],
-        areaprereq: [],
-		incompat: [],
-        warning: null,
-        wide: false,
-        tall: false,
-    },
-    {
         code: "COMP2620",
         name: "Logic",
         sem1: true,
@@ -408,6 +396,42 @@ let allCourseData = [
         prereq: ["COMP3620"],
         areaprereq: [],
 		incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP4691",
+        name: "Optimisation",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP3620", "MATH1013/MATH1115"],
+        areaprereq: [],
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP3670",
+        name: "Intro to Machine Learning",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP1110/COMP1140"],
+        areaprereq: [],
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
+    {
+        code: "COMP4650",
+        name: "Document Analysis",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP1600/MATH/STAT", "COMP1100/COMP1130/COMP1110/COMP1140/COMP1730/COMP2100"],
+        areaprereq: ["12 COMP3/INFS"],
+        incompat: [],
         warning: null,
         wide: false,
         tall: false,
@@ -488,12 +512,20 @@ function calculateAreaPrerequisites(courseData, needs, remaining) {
 
         for (let j = 0; j < ors.length && remaining.length > 0; ++j) {
             let index = 0;
-            console.log(remaining);
+            console.log("REMAINING (" + courseData.code + "): " + remaining);
             while (index != -1 && remaining.length > 0) {
+                console.log("R: " + ors[j]);
                 index = containsCourse(remaining, ors[j]);
                 if (index != -1) {
+                    let countsFor = 1;
+
+                    let courseData = getCourseDataFromCode(remaining[index].code);
+
+                    if (courseData != null && courseData.wide) countsFor *= 2;
+                    if (courseData != null && courseData.tall) countsFor *= 2;
+                    console.log("Counts for: " + countsFor);
                     remaining.splice(index, 1);
-                    amountFound++;
+                    amountFound += countsFor;
                 }
             }
         }
@@ -512,6 +544,7 @@ function checkPrerequisites(gridX, gridY) {
         return null;
     }
     let code = course.code;
+    console.log("\n\n\nCHECKING PREREQ FOR " + code);
     let courseData = getCourseDataFromCode(code);
 
     let needs = [];
@@ -540,13 +573,18 @@ function checkPrerequisites(gridX, gridY) {
     for (let i = 0; i < courseData.prereq.length; ++i) {
         let found = false;
         let ors = courseData.prereq[i].split("/");
-        console.log(ors);
 
         for (let j = 0; j < ors.length; ++j) {
+
             if (containsCourse(priorCourses, ors[j]) != -1) {
+
+                let index = otherCourses.indexOf(ors[j]);
+                if (index != -1 && ors[j].length == 8) {
+                    otherCourses.splice(index, 1);
+                }
+
                 found = true;
             }
-            otherCourses.splice(otherCourses.indexOf(ors[j], 1));
         }
 
         if (!found) {
@@ -643,7 +681,7 @@ function formatCodes(code) {
             if (codes[i].length == 4) {
                 output += codes[i] + (last ? " courses" : " or ");
             } else {
-                output += codes[i] + "xxx" + (last ? "-level courses" : "- or ");
+                output += codes[i] + "xxx" + (last ? " courses" : " or ");
             }
         }
 
