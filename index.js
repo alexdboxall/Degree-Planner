@@ -3,7 +3,7 @@ let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 let COURSE_WIDTH = 190;
 let COURSE_HEIGHT = 90;
-let SCRATCH_WIDTH = 4;
+let SCRATCH_WIDTH = 3;
 let MINIMUM_YEARS_REQUIRED = 4;
 let COURSES_PER_SEM_WITHOUT_OVERLOADING = 4;
 let courseArray = [];
@@ -970,7 +970,7 @@ function mouseDownHandler(e) {
     }
 
     draggingCourse = course;
-    rerender(e.offsetX, e.offsetY);
+    updateFilter(e.offsetX, e.offsetY);
 }
 
 function isGridPositionIllegal(x, y, long, tall) {
@@ -1016,8 +1016,12 @@ function mouseUpHandler(e) {
         */
 
         // return to original position, as invalid
-        x = draggingCourseOriginalGridX;
-        y = draggingCourseOriginalGridY;
+        // but allow dragging anywhere to scratch
+        if (x < COURSES_PER_SEM) {
+            x = draggingCourseOriginalGridX;
+            y = draggingCourseOriginalGridY;
+        }
+
     }
 
     draggingCourse.gridx = x;
@@ -1025,8 +1029,7 @@ function mouseUpHandler(e) {
     courseArray.push(draggingCourse);
 
     draggingCourse = null;
-
-    rerender(e.offsetX, e.offsetY);
+    updateFilter(e.offsetX, e.offsetY);
 }
 
 function mouseMoveHandler(e) {
@@ -1038,19 +1041,34 @@ function resizeCanvas(e) {
     context.canvas.height = (YEARS_OF_DEGREE * 3 - 1) * COURSE_HEIGHT;
 }
 
-function addBasicCourses() {
-    // TODO: clear the scratch
-
+function addCoursesToScratch(filter) {
     let scratchInitialPosition = COURSES_PER_SEM + 1;
 
+    let j = 0;
     for (let i = 0; i < allCourseData.length; ++i) {
-        addCourse(allCourseData[i].code, scratchInitialPosition + i % SCRATCH_WIDTH, Math.floor(i / SCRATCH_WIDTH));
+        if ((filter.length == 0 || allCourseData[i].code.substring(0, filter.length) == filter)) {
+            if (containsCourse(courseArray, allCourseData[i].code) == -1 && (draggingCourse == null || draggingCourse.code != allCourseData[i].code)) {
+                addCourse(allCourseData[i].code, scratchInitialPosition + j % SCRATCH_WIDTH, Math.floor(j / SCRATCH_WIDTH));
+                ++j;
+            }
+        }
     }
 }
 
+function updateFilter(mouseX = 0, mouseY = 0) {
+    for (let i = 0; i < courseArray.length; ++i) {
+        if (courseArray[i].gridx > COURSES_PER_SEM) {
+            courseArray.splice(i, 1);
+            --i;
+        }
+    }
+
+    addCoursesToScratch(document.getElementById("filterbox").value);
+    rerender(mouseX, mouseY);
+}
+
 setMode(true);
-addBasicCourses();
-rerender(0, 0);
+updateFilter();
 canvas.onmousedown = mouseDownHandler;
 canvas.onmouseup = mouseUpHandler;
 canvas.onmousemove = mouseMoveHandler;

@@ -5,7 +5,14 @@
 	</head>
 
 	<body>
-		<h1> Degree Planner </h1>
+		<p>
+			<h1 style='font-family: sans-serif'> Degree Planner </h1>
+			<form>
+				<label for="filterbox">Filter:</label>
+				<input id="filterbox" type="text" onchange="updateFilter()" onkeydown="updateFilter()" oninput="updateFilter()" onpaste="updateFilter()">
+			</form>
+		</p>
+
 		<canvas id="canvas" width=1350 height=1120> </canvas>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 		<script src="index.js"> </script>
