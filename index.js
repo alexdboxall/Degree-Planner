@@ -22,65 +22,97 @@ let allCourseData = [
         name: "Programming as Problem Solving",
         sem1: true,
         sem2: true,
-        prereq: []
+        prereq: [],
+        incompat: ["COMP1130"]
     },
     {
         code: "COMP1130",
         name: "Programming as Problem Solving (Advanced)",
         sem1: true,
         sem2: false,
-        prereq: {}
+        prereq: [],
+        incompat: ["COMP1100"]
     },
     {
         code: "COMP1110",
         name: "Structured Programming",
         sem1: false,
         sem2: true,
-        prereq: ["COMP1100/COMP1130"]
+        prereq: ["COMP1100/COMP1130"],
+        incompat: []
     },
     {
         code: "COMP1140",
         name: "Structured Programming (Advanced)",
         sem1: false,
         sem2: true,
-        prereq: ["COMP1130"]
+        prereq: ["COMP1130"],
+        incompat: []
     },
     {
         code: "COMP1600",
         name: "Foundations of Computing",
         sem1: false,
         sem2: true,
-        prereq: ["COMP1100/COMP1130", "MATH"]
+        prereq: ["COMP1100/COMP1130", "MATH"],
+        incompat: []
     },
     {
         code: "MATH1013",
         name: "Mathematics and Applications 1",
         sem1: true,
         sem2: true,
-        prereq: []
+        prereq: [],
+        incompat: []
     },
     {
         code: "MATH1115",
         name: "Advanced Mathematics and Applications 1",
         sem1: true,
         sem2: false,
-        prereq: []
+        prereq: [],
+        incompat: []
     },
     {
         code: "MATH1014",
         name: "Mathematics and Applications 2",
         sem1: false,
         sem2: true,
-        prereq: ["MATH1013/MATH1115"]
+        prereq: ["MATH1013/MATH1115"],
+        incompat: []
     },
     {
         code: "MATH1116",
         name: "Advanced Mathematics and Applications 2",
         sem1: false,
         sem2: true,
-        prereq: ["MATH1115"]
+        prereq: ["MATH1115"],
+        incompat: []
+    },
+    {
+        code: "COMP2100",
+        name: "Software Design Methodologies",
+        sem1: true,
+        sem2: true,
+        prereq: ["COMP1100/COMP1130", "COMP1110/COMP1140", "MATH"],
+        incompat: []
     },
 ];
+
+function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
+    let output = [];
+
+    for (let i = 0; i < courseArray.length; ++i) {
+        if (courseArray[i].gridy <= gridY &&
+            courseArray[i].gridx < COURSES_PER_SEM &&
+            courseArray[i].code != codeToIgnore) {
+
+            output.push(courseArray[i]);
+        }
+    }
+
+    return output;
+}
 
 function getCoursesRunningBefore(gridY) {
     let output = [];
@@ -109,9 +141,26 @@ function containsCourse(courseArray, targetCode) {
     return false;
 }
 
-function checkPrerequisites(gridX, gridY) {
-    console.log(gridX, gridY);
+function checkIncompatibilities(gridX, gridY) {
+    let course = getCourseAtPosition(gridX, gridY);
+    if (course == null) {
+        return null;
+    }
+    let code = course.code;
+    let courseData = getCourseDataFromCode(code);
 
+    let priorAndConcurrentCourses = getCoursesRunningBeforeAndConcurrently(gridY, code);
+
+    for (let i = 0; i < courseData.incompat.length; ++i) {
+        if (containsCourse(priorAndConcurrentCourses, courseData.incompat[i])) {
+            return courseData.incompat[i];
+        }
+    }
+
+    return null;
+}
+
+function checkPrerequisites(gridX, gridY) {
     let course = getCourseAtPosition(gridX, gridY);
     if (course == null) {
         return null;
@@ -219,9 +268,13 @@ function renderCourseAtPosition(code, x, y) {
     } else {
         // normal course
         let prereq = checkPrerequisites(xToGridX(x), yToGridY(y));
+        let incompats = checkIncompatibilities(xToGridX(x), yToGridY(y));
 
         if (prereq == null) {
             alert("ERROR");
+
+        } else if (incompats != null) {
+            courseColour = "#FF4090";
 
         } else if (!doesCourseRunThere(code, x, y)) {
             // doesn't run in that semester
@@ -427,6 +480,8 @@ function addBasicCourses() {
         "MATH1014",
         "MATH1115",
         "MATH1116",
+        "COMP2100",
+        "COMP2120",
     ]
 
     for (let i = 0; i < course_list.length; ++i) {
