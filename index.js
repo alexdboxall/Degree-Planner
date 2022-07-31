@@ -295,8 +295,6 @@ function renderCourseAtPosition(code, x, y) {
         // doesn't exist
         courseColour = "#808080";
 
-        errorMessage = "Unknown course...";
-
     } else if ((draggingCourse != null && code == draggingCourse.code) || xToGridX(x) > COURSES_PER_SEM) {
         // dragging, or in the scratch area
         courseColour = "#20C0FF";
@@ -355,6 +353,12 @@ function renderCourseAtPosition(code, x, y) {
     context.font = "15px Arial";
     renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, COURSE_WIDTH - 10);
 
+    if (errorMessage.length != 0) {
+        let warningIcon = new Image();
+        warningIcon.src = "warning.png";
+        context.drawImage(warningIcon, x + COURSE_WIDTH - 40, y + COURSE_HEIGHT - 40, 32, 32);
+    }
+
     return errorMessage;
 }
 
@@ -384,7 +388,9 @@ function rerender(mouseX, mouseY) {
         renderCourseAtPosition(draggingCourse.code, mouseX - draggingCourseOffsetX, mouseY - draggingCourseOffsetY);
 
     } else if (errorMessage != null) {
-        renderErrorMessage(errorMessage, mouseX, mouseY);
+        if ((mouseX % COURSE_WIDTH) >= COURSE_WIDTH - 40 && (mouseY % COURSE_HEIGHT) >= COURSE_HEIGHT - 40) {
+            renderErrorMessage(errorMessage, mouseX, mouseY);
+        }
     }
 }
 
