@@ -100,6 +100,14 @@ let allCourseData = [
         prereq: ["COMP1100/COMP1130", "COMP1110/COMP1140", "MATH"],
         incompat: []
     },
+    {
+        code: "COMP2120",
+        name: "Software Engineering",
+        sem1: false,
+        sem2: true,
+        prereq: ["COMP2100"],
+        incompat: []
+    },
 ];
 
 function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
@@ -172,6 +180,15 @@ function checkPrerequisites(gridX, gridY) {
     let courseData = getCourseDataFromCode(code);
 
     let needs = [];
+
+    if (code == "COMP2120") {
+        /*
+        * Ugly hack to allow for COMP2120 to be taken at the
+        * same time as COMP2100 (the only prerequisite for
+        * 2120 is 2100)
+        */
+        gridY++;
+    }
 
     let priorCourses = getCoursesRunningBefore(gridY);
 
@@ -264,7 +281,7 @@ function renderErrorMessage(message, x, y) {
 
     context.fillStyle = "#000000";
     context.font = "15px Arial";
-    renderWrappedText(message, x + 10, y + 20, ERROR_MESSAGE_WIDTH);
+    renderWrappedText(message, x + 20, y + 20, ERROR_MESSAGE_WIDTH);
 }
 
 function formatCodes(code) {
