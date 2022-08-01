@@ -473,6 +473,35 @@ let allCourseData = [
         wide: false,
         tall: false,
     },
+    {
+        code: "*AACRD",
+        name: "Bachelor of Advanced Computing (Research & Development) (Honours)",
+        sem1: true,
+        sem2: false,
+        prereq: [
+            "COMP1130",
+            "COMP1140",
+            "COMP1600",
+            "COMP2100",
+            "COMP2120",
+            "COMP2300",
+            "COMP2310",
+            "COMP2420",
+            "COMP2550",
+            "COMP2560",
+            "COMP3600",
+            "COMP3770",
+            "COMP4550",
+            "MATH1005/MATH2222",
+            "MATH1013/MATH1115",
+            "MATH1014/MATH1116/STAT1003/STAT1008"
+        ],
+        areaprereq: ["48 !"],
+        incompat: [],
+        warning: null,
+        wide: false,
+        tall: false,
+    },
 ];
 
 function getCoursesRunningBeforeAndConcurrently(gridY, codeToIgnore) {
@@ -537,17 +566,25 @@ function checkIncompatibilities(gridX, gridY) {
     return null;
 }
 
-function calculateAreaPrerequisites(courseData, needs, remaining) {
+function calculateAreaPrerequisites(courseData, needs, remaining, additional= []) {
     for (let j = 0; j < remaining.length; ++j) {
         console.log("REMAINING [" + j + "] " + remaining[j].code);
     }
 
     let reinsert = [];
 
+    let pres = []
     for (let i = 0; i < courseData.areaprereq.length; ++i) {
-        console.log("CHECKING: " + courseData.areaprereq[i]);
-        let amount = parseInt(courseData.areaprereq[i].split(' ')[0]);
-        let ors = courseData.areaprereq[i].split(' ')[1].split('/');
+        pres.push(courseData.areaprereq[i]);
+    }
+    while (additional.length) {
+        pres.push(additional[0]);
+        additional.splice(0, 1);
+    }
+
+    for (let i = 0; i < pres.length; ++i) {
+        let amount = parseInt(pres[i].split(' ')[0]);
+        let ors = pres[i].split(' ')[1].split('/');
 
         // 6 units per regular course
         amount = Math.floor(amount / 6);
@@ -582,10 +619,8 @@ function calculateAreaPrerequisites(courseData, needs, remaining) {
             }
         }
 
-        console.log("CHECKED (" + courseData.areaprereq[i] + "), ", amountFound, "/", amount);
-
         if (amountFound < amount) {
-            needs.push("*" + ((amount - amountFound) * 6) + " " + courseData.areaprereq[i].split(' ')[1]);
+            needs.push("*" + ((amount - amountFound) * 6) + " " + pres[i].split(' ')[1]);
         }
 
         while (reinsert.length) {
@@ -599,7 +634,7 @@ function calculateAreaPrerequisites(courseData, needs, remaining) {
 
 function getCourseIndexByCode(courses, code) {
     for (let i = 0; i < courses.length; ++i) {
-        if (courses[i].code == code) {
+        if (courses[i].code == code && courses[i].gridx < COURSES_PER_SEM) {
             return i;
         }
     }
@@ -635,8 +670,41 @@ function checkPrerequisites(gridX, gridY) {
         }
     }
 
+    let additional = [];
+
     let priorCourses = getCoursesRunningBefore(gridY);
     let otherCourses = getCoursesRunningBefore(gridY);
+
+    if (code == "*AACOM") {
+        let index = getCourseIndexByCode(priorCourses, "COMP4550");
+        if (index == -1) {
+            let index = getCourseIndexByCode(priorCourses, "COMP4560");
+            if (index == -1) {
+                needs.push("COMP4560/COMP4550");
+                additional.push("12 COMP3/COMP4");
+            } else {
+                priorCourses.splice(index, 1);
+                otherCourses.splice(index, 1);
+                additional.push("12 COMP3/COMP4");
+            }
+        } else {
+            priorCourses.splice(index, 1);
+            otherCourses.splice(index, 1);
+        }
+
+        let indexA = getCourseIndexByCode(priorCourses, "ENGN3230");
+        let indexB = getCourseIndexByCode(priorCourses, "VCUG3001");
+
+        if (indexA == -1 && indexB == -1) {
+            additional.push("12 COMP3/COMP4");
+        } else if (indexA != -1 && indexB != -1) {
+            // all good
+        } else {
+            priorCourses.splice(indexA, 1);
+            otherCourses.splice(indexA, 1);
+            additional.push("12 COMP3/COMP4");
+        }
+    }
 
     for (let i = 0; i < courseData.prereq.length; ++i) {
         let found = false;
@@ -647,10 +715,12 @@ function checkPrerequisites(gridX, gridY) {
             if (index != -1) {
                 console.log("REMOVING " + ors[j]);
 
+                // different array = different index
+                index = containsCourse(otherCourses, ors[j]);
                 if (index != -1) {
                     console.log("SPLICING...\n");
                     otherCourses.splice(index, 1);
-                    console.log("LENGTH = " + otherCourses.length);
+                    console.log("POST LENGTH = " + otherCourses.length);
                 } else if (index == -1) {
                     alert("Cannot splice off");
                 }
@@ -665,11 +735,9 @@ function checkPrerequisites(gridX, gridY) {
         }
     }
 
-    if (code == "*AACOM") {
-
-        // TODO: specialisation...
-
-        needs = calculateAreaPrerequisites(courseData, needs, otherCourses);
+    if (code == "*AACOM" || code == "*AACRD") {
+        needs.push("@");
+        needs = calculateAreaPrerequisites(courseData, needs, otherCourses, additional);
         return needs;
     }
 
@@ -758,6 +826,9 @@ function renderErrorMessage(message, x, y) {
 }
 
 function formatCodes(code) {
+    if (code == "@") {
+        return "24 units of a specialisation";
+    }
     if (code[0] == '*') {
         let amount = parseInt(code.substring(1).split(" ")[0]);
         let codes = code.split(" ")[1].split("/");
@@ -859,8 +930,13 @@ function renderCourseAtPosition(code, x, y) {
             errorMessage += "\n";
         }
         if (courseData.warning != null) {
-            if (errorMessage == "") courseColour = "#EEEE22";
-            errorMessage += "- " + courseData.warning;
+            if (courseData.warning == "Must be enrolled in the Bachelor of Advanced Computing (Research & Development)." &&
+                getDegreeName() == "AACRD") {
+
+            } else {
+                if (errorMessage == "") courseColour = "#EEEE22";
+                errorMessage += "- " + courseData.warning;
+            }
         }
     }
 
@@ -1234,6 +1310,9 @@ function resetToCoreAdv() {
     addCourse("MATH1115", 1, 0);
     addCourse("MATH1116", 1, 1);
     addCourse("MATH2222", 2, 0);
+
+    addCourse("COMP2550", 3, 3);
+    addCourse("COMP2560", 3, 4);
 
     addCommon();
     updateFilter();
