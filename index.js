@@ -21,9 +21,9 @@ let YEARS_OF_DEGREE = 5;
 
 /*
 * TODO:
-*   fuzzy searching with Fuse.js
-*   showing blue but (!) if prerequisite is in red
-*   README, submission form
+*   sort scratch are alphabetically
+*   merge areaprereqs where possible - also fixes the problem that long/tall courses cannot 'overflow'
+*       their units into the next one
 *   more courses, specialisations
 *   UI improvements
 *   save/load (via JSON)
@@ -573,13 +573,27 @@ function calculateAreaPrerequisites(courseData, needs, remaining, additional= []
 
     let reinsert = [];
 
-    let pres = []
+    let pres = [];
+    let anuelectives = [];
+
     for (let i = 0; i < courseData.areaprereq.length; ++i) {
-        pres.push(courseData.areaprereq[i]);
+        if (courseData.areaprereq[i].indexOf(" !") != -1) {
+            anuelectives.push(courseData.areaprereq[i]);
+        } else {
+            pres.push(courseData.areaprereq[i]);
+        }
     }
     while (additional.length) {
-        pres.push(additional[0]);
+        if (additional[0].indexOf(" !") != -1) {
+            anuelectives.push(additional[0]);
+        } else {
+            pres.push(additional[0]);
+        }
         additional.splice(0, 1);
+    }
+    while (anuelectives.length) {
+        pres.push(anuelectives[0]);
+        anuelectives.splice(0, 1);
     }
 
     for (let i = 0; i < pres.length; ++i) {
