@@ -711,20 +711,9 @@ function checkPrerequisites(gridX, gridY) {
         let ors = courseData.prereq[i].split("/");
 
         for (let j = 0; j < ors.length; ++j) {
-            let index = containsCourse(priorCourses, ors[j]);
+            let index = containsCourse(otherCourses, ors[j]);
             if (index != -1) {
-                console.log("REMOVING " + ors[j]);
-
-                // different array = different index
-                index = containsCourse(otherCourses, ors[j]);
-                if (index != -1) {
-                    console.log("SPLICING...\n");
-                    otherCourses.splice(index, 1);
-                    console.log("POST LENGTH = " + otherCourses.length);
-                } else if (index == -1) {
-                    alert("Cannot splice off");
-                }
-
+                otherCourses.splice(index, 1);
                 found = true;
                 break;
             }
