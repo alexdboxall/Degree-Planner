@@ -1,4 +1,7 @@
 
+import { fuzzySearch } from './fuzzy-search.mjs';
+
+
 let canvas = document.getElementById("canvas");
 let context = canvas.getContext("2d");
 let COURSE_WIDTH = 190;
@@ -441,33 +444,8 @@ let allCourseData = [
         name: "Document Analysis",
         sem1: false,
         sem2: true,
-        prereq: ["COMP1100/COMP1130/COMP1110/COMP1140/COMP1730/COMP2100", "COMP1600/MATH/STAT"],
+        prereq: ["COMP1600/MATH/STAT", "COMP1100/COMP1130/COMP1110/COMP1140/COMP1730/COMP2100"],
         areaprereq: ["12 COMP3/INFS"],
-        incompat: [],
-        warning: null,
-        wide: false,
-        tall: false,
-    },
-    {
-        code: "*AACOM",
-        name: "Bachelor of Advanced Computing (Honours)",
-        sem1: true,
-        sem2: false,
-        prereq: [
-            "COMP1600",
-            "COMP2100",
-            "COMP2120",
-            "COMP2300",
-            "COMP2310",
-            "COMP2420",
-            "COMP3600",
-            "COMP4450",
-            "MATH1005/MATH2222",
-            "COMP1100/COMP1130",
-            "COMP1110/COMP1140",
-            "MATH1013/MATH1014/MATH1115/MATH1116/MATH2301/ENGN1211/STAT1008/STAT1003/COMP",
-        ],
-        areaprereq: ["6 COMP3/COMP4", "6 COMP", "48 !"],
         incompat: [],
         warning: null,
         wide: false,
@@ -511,7 +489,7 @@ function containsCourse(array, targetCode) {
     */
 
     for (let i = 0; i < array.length; ++i) {
-        if (array[i].code.substr(0, targetCode.length) == targetCode || targetCode == "!") {
+        if (array[i].code.substr(0, targetCode.length) == targetCode) {
             return i;
         }
     }
@@ -538,14 +516,7 @@ function checkIncompatibilities(gridX, gridY) {
 }
 
 function calculateAreaPrerequisites(courseData, needs, remaining) {
-    for (let j = 0; j < remaining.length; ++j) {
-        console.log("REMAINING [" + j + "] " + remaining[j].code);
-    }
-
-    let reinsert = [];
-
     for (let i = 0; i < courseData.areaprereq.length; ++i) {
-        console.log("CHECKING: " + courseData.areaprereq[i]);
         let amount = parseInt(courseData.areaprereq[i].split(' ')[0]);
         let ors = courseData.areaprereq[i].split(' ')[1].split('/');
 
@@ -567,43 +538,19 @@ function calculateAreaPrerequisites(courseData, needs, remaining) {
 
                     if (courseData != null && courseData.wide) countsFor *= 2;
                     if (courseData != null && courseData.tall) countsFor *= 2;
-                    console.log(courseData.code + " Counts for: " + countsFor);
-
-                    // TODO: if amountFound >= amount, remove it - but then add
-                    // it back in afterwards so other courses may use it
-                    if (amountFound >= amount) {
-                        reinsert.push(remaining[index]);
-                    }
+                    console.log("Counts for: " + countsFor);
                     remaining.splice(index, 1);
-
-                    console.log("REMAINING LENGTH = ", remaining.length);
                     amountFound += countsFor;
                 }
             }
         }
 
-        console.log("CHECKED (" + courseData.areaprereq[i] + "), ", amountFound, "/", amount);
-
         if (amountFound < amount) {
             needs.push("*" + ((amount - amountFound) * 6) + " " + courseData.areaprereq[i].split(' ')[1]);
-        }
-
-        while (reinsert.length) {
-            remaining.push(reinsert[0]);
-            reinsert.splice(0, 1);
         }
     }
 
     return needs;
-}
-
-function getCourseIndexByCode(courses, code) {
-    for (let i = 0; i < courses.length; ++i) {
-        if (courses[i].code == code) {
-            return i;
-        }
-    }
-    return -1;
 }
 
 function checkPrerequisites(gridX, gridY) {
@@ -643,34 +590,21 @@ function checkPrerequisites(gridX, gridY) {
         let ors = courseData.prereq[i].split("/");
 
         for (let j = 0; j < ors.length; ++j) {
-            let index = containsCourse(priorCourses, ors[j]);
-            if (index != -1) {
-                console.log("REMOVING " + ors[j]);
 
-                if (index != -1) {
-                    console.log("SPLICING...\n");
+            if (containsCourse(priorCourses, ors[j]) != -1) {
+
+                let index = otherCourses.indexOf(ors[j]);
+                if (index != -1 && ors[j].length == 8) {
                     otherCourses.splice(index, 1);
-                    console.log("LENGTH = " + otherCourses.length);
-                } else if (index == -1) {
-                    alert("Cannot splice off");
                 }
 
                 found = true;
-                break;
             }
         }
 
         if (!found) {
             needs.push(courseData.prereq[i]);
         }
-    }
-
-    if (code == "*AACOM") {
-
-        // TODO: specialisation...
-
-        needs = calculateAreaPrerequisites(courseData, needs, otherCourses);
-        return needs;
     }
 
     return calculateAreaPrerequisites(courseData, needs, otherCourses);
@@ -707,7 +641,7 @@ function drawRectWithOutline(x, y, w, h, colour, outlineColour, outlineWidth) {
 function clearCanvas() {
     drawRect(0, 0, canvas.clientWidth, canvas.clientHeight, "#FFFFFF");
 
-    for (let y = 0; y < 3 * YEARS_OF_DEGREE - 3; ++y) {
+    for (let y = 0; y < 3 * YEARS_OF_DEGREE - 1; ++y) {
         for (let x = 0; x < COURSES_PER_SEM + SCRATCH_WIDTH + 1; ++x) {
             if (isGridPositionIllegal(x, y)) continue;
 
@@ -740,15 +674,6 @@ function renderWrappedText(text, x, y, maxWidth) {
     }
 }
 
-function renderDegreeErrorMessage(message, x, y) {
-    let multiplier = 3;
-    drawRectWithOutline(x, y - ERROR_MESSAGE_HEIGHT * 3, ERROR_MESSAGE_WIDTH, ERROR_MESSAGE_HEIGHT * 3, "#E0E0E0", "#000000", 1);
-
-    context.fillStyle = "#000000";
-    context.font = "14px Arial";
-    renderWrappedText(message, x + 20, y - ERROR_MESSAGE_HEIGHT * 3 + 20, ERROR_MESSAGE_WIDTH - 30);
-}
-
 function renderErrorMessage(message, x, y) {
     drawRectWithOutline(x, y, ERROR_MESSAGE_WIDTH, ERROR_MESSAGE_HEIGHT, "#E0E0E0", "#000000", 1);
 
@@ -759,6 +684,7 @@ function renderErrorMessage(message, x, y) {
 
 function formatCodes(code) {
     if (code[0] == '*') {
+        alert(code);
         let amount = parseInt(code.substring(1).split(" ")[0]);
         let codes = code.split(" ")[1].split("/");
 
@@ -769,8 +695,6 @@ function formatCodes(code) {
 
             if (codes[i].length == 4) {
                 output += codes[i] + (last ? " courses" : " or ");
-            } else if (codes[i] == "!") {
-                output += "ANU courses" + (last ? "" : ", or ");
             } else {
                 output += codes[i] + "xxx" + (last ? " courses" : " or ");
             }
@@ -813,7 +737,6 @@ function renderCourseAtPosition(code, x, y) {
     } else {
         // normal course
         let prereq = checkPrerequisites(xToGridX(x), yToGridY(y));
-        console.log("X2GX " + xToGridX(x));
         let incompat = checkIncompatibilities(xToGridX(x), yToGridY(y));
 
         if (prereq == null) {
@@ -861,6 +784,7 @@ function renderCourseAtPosition(code, x, y) {
         if (courseData.warning != null) {
             if (errorMessage == "") courseColour = "#EEEE22";
             errorMessage += "- " + courseData.warning;
+
         }
     }
 
@@ -870,24 +794,15 @@ function renderCourseAtPosition(code, x, y) {
         if (courseData.tall) height *= 2;
         if (courseData.wide) width *= 2;
     }
-    if (courseData.code[0] == '*') {
-        width = COURSE_WIDTH * COURSES_PER_SEM;
-    }
     drawRectWithOutline(x, y, width, height,
         courseColour, "#000000", 1);
 
-    if (code[0] != '*') {
-        context.fillStyle = "#000000";
-        context.font = "15px Arial";
-        context.fillText(code, x + 5, y + 25);
+    context.fillStyle = "#000000";
+    context.font = "15px Arial";
+    context.fillText(code, x + 5, y + 25);
 
-        context.font = "14px Arial";
-        renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, width - 10);
-    } else {
-        context.fillStyle = "#000000";
-        context.font = "18px Arial";
-        context.fillText(courseData.name, x + 5, y + 25);
-    }
+    context.font = "14px Arial";
+    renderWrappedText(courseData == null ? "???" : courseData.name, x + 5, y + 45, COURSE_WIDTH - 10);
 
     if (errorMessage.length != 0) {
         let warningIcon = new Image();
@@ -903,10 +818,6 @@ function renderCourse(course) {
     let y = course.gridy * COURSE_HEIGHT;
 
     return renderCourseAtPosition(course.code, x, y);
-}
-
-function renderDegreeChecker(mouseX, mouseY) {
-
 }
 
 function rerender(mouseX, mouseY) {
@@ -926,8 +837,7 @@ function rerender(mouseX, mouseY) {
             ((mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy) ||
                 (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy && courseData && courseData.wide) ||
                 (mouseGridX == courseArray[i].gridx && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall) ||
-                (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall && courseData.wide) ||
-                    mouseGridY == courseArray[i].gridy && courseData && courseData.code[0] == '*' && mouseGridX < COURSES_PER_SEM
+                (mouseGridX == courseArray[i].gridx + 1 && mouseGridY == courseArray[i].gridy + 1 && courseData && courseData.tall && courseData.wide)
             )) {
             errorMessage = message;
             errorCourse = courseArray[i];
@@ -946,29 +856,13 @@ function rerender(mouseX, mouseY) {
             if (errorCourseData.tall) height *= 2;
             if (errorCourseData.wide) width *= 2;
         }
-        if (errorCourseData.code[0] == '*') {
-            width = COURSE_WIDTH * COURSES_PER_SEM;
-        }
 
         let baseX = errorCourse.gridx * COURSE_WIDTH;
         let baseY = errorCourse.gridy * COURSE_HEIGHT;
         if (mouseX - baseX >= width - 40 && mouseY - baseY >= height - 40) {
-            if (errorCourseData.code[0] == '*') {
-                renderDegreeErrorMessage(errorMessage, mouseX, mouseY);
-            } else {
-                renderErrorMessage(errorMessage, mouseX, mouseY);
-            }
+            renderErrorMessage(errorMessage, mouseX, mouseY);
         }
     }
-
-    renderDegreeChecker(mouseX, mouseY);
-}
-
-function getDegreeName() {
-    if (document.getElementById("bac").checked) return "AACOM";
-    if (document.getElementById("bacrd").checked) return "AACRD";
-
-    return "OTHER";
 }
 
 function addCourse(code, gridx, gridy) {
@@ -1081,10 +975,6 @@ function mouseDownHandler(e) {
 
     let course = getCourseAtPositionViaMouse(x, y);
 
-    if (course.code[0] == '*') {
-        return;
-    }
-
     if (course != null) {
         removeCourse(course);
         draggingCourseOriginalGridX = course.gridx;
@@ -1158,7 +1048,6 @@ function mouseUpHandler(e) {
 }
 
 function mouseMoveHandler(e) {
-    console.log(getDegreeName());
     rerender(e.offsetX, e.offsetY);
 }
 
@@ -1167,14 +1056,26 @@ function resizeCanvas(e) {
     context.canvas.height = (YEARS_OF_DEGREE * 3 - 1) * COURSE_HEIGHT;
 }
 
+const options = {
+    keys: [
+        "name",
+        "code"
+    ]
+};
+
+const json = JSON.stringify(allCourseData);
+console.log(json);
+fuzzySearch(json, [
+    "name",
+    "code"
+]);
+
 function addCoursesToScratch(filter) {
     let scratchInitialPosition = COURSES_PER_SEM + 1;
 
     let j = 0;
     for (let i = 0; i < allCourseData.length; ++i) {
-        let matchesFilter = allCourseData[i].code.substring(0, filter.length) == filter;
-
-        if ((filter.length == 0 || matchesFilter) && allCourseData[i].code[0] != '*') {
+        if ((filter.length == 0 || allCourseData[i].code.substring(0, filter.length) == filter)) {
             if (containsCourse(courseArray, allCourseData[i].code) == -1 && (draggingCourse == null || draggingCourse.code != allCourseData[i].code)) {
                 addCourse(allCourseData[i].code, scratchInitialPosition + j % SCRATCH_WIDTH, Math.floor(j / SCRATCH_WIDTH));
                 ++j;
@@ -1185,14 +1086,11 @@ function addCoursesToScratch(filter) {
 
 function updateFilter(mouseX = 0, mouseY = 0) {
     for (let i = 0; i < courseArray.length; ++i) {
-        if (courseArray[i].gridx > COURSES_PER_SEM || courseArray[i].gridy == YEARS_OF_DEGREE * 3 - 3) {
+        if (courseArray[i].gridx > COURSES_PER_SEM) {
             courseArray.splice(i, 1);
             --i;
         }
     }
-
-    if (getDegreeName() == "AACOM") addCourse("*AACOM", 0, YEARS_OF_DEGREE * 3 - 3);
-    if (getDegreeName() == "AACRD") addCourse("*AACRD", 0, YEARS_OF_DEGREE * 3 - 3);
 
     addCoursesToScratch(document.getElementById("filterbox").value);
     rerender(mouseX, mouseY);

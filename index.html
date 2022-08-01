@@ -7,15 +7,32 @@
 	<body>
 		<p>
 			<h1 style='font-family: sans-serif'> Degree Planner </h1>
-			<form>
-				<label for="filterbox">Filter:</label>
-				<input id="filterbox" type="text" onchange="updateFilter()" onkeydown="updateFilter()" oninput="updateFilter()" onpaste="updateFilter()">
-			</form>
+			<button onclick="resetAll()"> Reset to Nothing </button>
+			<button onclick="resetToCore()"> Reset to Suggested Courses</button>
+			<button onclick="resetToCoreAdv()"> Reset to Suggested Courses (Adv)</button>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+			<input type="radio" id="bac" checked="true" name="degree" value="HTML" onchange="updateFilter()">
+			<label for="bac">BAC</label>
+			<input type="radio" id="bacrd" name="degree" value="CSS" onchange="updateFilter()">
+			<label for="bacrd">BAC (R&D)</label>
+			<input type="radio" id="other" name="degree" value="CSS" onchange="updateFilter()">
+			<label for="other">Other</label>
+
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+		<label for="filterbox">Filter:</label>
+		<input id="filterbox" type="text" onchange="updateFilter()" onkeydown="updateFilter()" oninput="updateFilter()" onpaste="updateFilter()">
+
 		</p>
 
 		<canvas id="canvas" width=1350 height=1120> </canvas>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-		<script src="index.js"> </script>
+		<script src="https://cdn.jsdelivr.net/npm/fuzzysort@2.0.1/fuzzysort.min.js"></script>
+		<script src="index.js"></script>
 	</body>
 
 </html>
